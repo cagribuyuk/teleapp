@@ -1,0 +1,41 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: "0.0.0.0:4317"
+
+processors:
+  batch:
+    send_batch_size: 1000
+    timeout: 5s
+
+exporters:
+  clickhouse:
+    endpoint: "https://oozq8sk9ks.germanywestcentral.azure.clickhouse.cloud:8443"
+    username: "default"
+    password: "4aJFECl6zW._S"
+    database: "default"
+    create_schema: true
+    compress: lz4
+    ttl: 72h
+    async_insert: true
+    logs_table_name: otel_logs
+    traces_table_name: otel_traces
+    metrics_table_name: otel_metrics
+    timeout: 5s
+    retry_on_failure:
+      enabled: true
+      initial_interval: 5s
+      max_interval: 30s
+      max_elapsed_time: 300s
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [clickhouse]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [clickhouse]
